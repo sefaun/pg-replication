@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  pg-master:
+    image: 'pg-replication:latest'
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - REPLICA_POSTGRES_USER=repuser
+      - REPLICA_POSTGRES_PASSWORD=repuser
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - REPLICATE_TO=pg-slave1
+      - REPLICA_NAME=r1
+      - SYNCHRONOUS_COMMIT=off
+
+  pg-slave1:
+    image: 'pg-replication:latest'
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=repuser
+      - POSTGRES_PASSWORD=repuser
+      - REPLICA_NAME=r1
+      - REPLICATE_FROM=pg-master
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
+  # pg-slave2:
+  #   image: 'pg-replication:latest'
+  #   ports:
+  #     - 5434:5432
+  #   environment:
+  #     - POSTGRES_USER=repuser
+  #     - POSTGRES_PASSWORD=repuser
+  #     - REPLICA_NAME=r1
+  #     - REPLICATE_FROM=pg-master
+  #     - PGDATA=/var/lib/postgresql/data/pgdata
+  #   depends_on:
+  #     - pg-master
