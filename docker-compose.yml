@@ -10,10 +10,10 @@ services:
       - POSTGRES_PASSWORD=postgres
       - REPLICA_POSTGRES_USER=repuser
       - REPLICA_POSTGRES_PASSWORD=repuser
-      - PGDATA=/var/lib/postgresql/data/pgdata
       - REPLICATE_TO=pg-slave1
       - REPLICA_NAME=r1
       - SYNCHRONOUS_COMMIT=off
+      - PGDATA=/var/lib/postgresql/data/pgdata
 
   pg-slave1:
     image: 'pg-replication:latest'
@@ -36,5 +36,3 @@ services:
   #     - REPLICA_NAME=r1
   #     - REPLICATE_FROM=pg-master
   #     - PGDATA=/var/lib/postgresql/data/pgdata
-  #   depends_on:
-  #     - pg-master
