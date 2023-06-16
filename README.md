@@ -1,6 +1,6 @@
 ## Installing
 
 ```sh
-docker build -t timescale-replication .
+docker build -t pg-replication .
 docker-compose up
 ```
