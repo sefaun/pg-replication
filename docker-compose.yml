@@ -6,33 +6,38 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - REPLICA_POSTGRES_USER=repuser
-      - REPLICA_POSTGRES_PASSWORD=repuser
-      - REPLICATE_TO=pg-slave1
-      - REPLICA_NAME=r1
-      - SYNCHRONOUS_COMMIT=off
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      P_MASTER: P_MASTER
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      REPLICA_POSTGRES_USER: repuser
+      REPLICA_POSTGRES_PASSWORD: repuser
+      REPLICATE_TO: pg-slave1
+      REPLICATE_TO2: pg-slave2
+      REPLICA_NAME: r1
+      REPLICA_NAME2: r2
+      SYNCHRONOUS_COMMIT: 'off'
+      PGDATA: /var/lib/postgresql/data/pgdata
 
   pg-slave1:
     image: 'pg-replication:latest'
     ports:
       - 5433:5432
     environment:
-      - POSTGRES_USER=repuser
-      - POSTGRES_PASSWORD=repuser
-      - REPLICA_NAME=r1
-      - REPLICATE_FROM=pg-master
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      P_SLAVE1: P_SLAVE1
+      POSTGRES_USER: repuser
+      POSTGRES_PASSWORD: repuser
+      REPLICA_NAME: r1
+      REPLICATE_FROM: pg-master
+      PGDATA: /var/lib/postgresql/data/pgdata
 
-  # pg-slave2:
-  #   image: 'pg-replication:latest'
-  #   ports:
-  #     - 5434:5432
-  #   environment:
-  #     - POSTGRES_USER=repuser
-  #     - POSTGRES_PASSWORD=repuser
-  #     - REPLICA_NAME=r1
-  #     - REPLICATE_FROM=pg-master
-  #     - PGDATA=/var/lib/postgresql/data/pgdata
+  pg-slave2:
+    image: 'pg-replication:latest'
+    ports:
+      - 5434:5432
+    environment:
+      P_SLAVE2: P_SLAVE2
+      POSTGRES_USER: repuser
+      POSTGRES_PASSWORD: repuser
+      REPLICA_NAME2: r2
+      REPLICATE_FROM: pg-master
+      PGDATA: /var/lib/postgresql/data/pgdata
