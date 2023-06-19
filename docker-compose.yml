@@ -1,6 +1,25 @@
 version: '3.9'
 
 services:
+  pg-pool:
+    image: 'bitnami/pgpool:4.4.3'
+    ports:
+      - 7000:5432
+    environment:
+      PGPOOL_BACKEND_NODES: 0:pg-master:5432,1:pg-slave1:5433,2:pg-slave2:5434
+      PGPOOL_SR_CHECK_USER: repuser
+      PGPOOL_SR_CHECK_PASSWORD: repuser
+      PGPOOL_ENABLE_LDAP: 'no'
+      PGPOOL_POSTGRES_USERNAME: postgres
+      PGPOOL_POSTGRES_PASSWORD: postgres
+      PGPOOL_ADMIN_USERNAME: postgres
+      PGPOOL_ADMIN_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   pg-master:
     image: 'pg-replication:latest'
     ports:
