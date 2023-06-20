@@ -12,13 +12,19 @@ services:
       PGPOOL_ENABLE_LDAP: 'no'
       PGPOOL_POSTGRES_USERNAME: postgres
       PGPOOL_POSTGRES_PASSWORD: postgres
-      PGPOOL_ADMIN_USERNAME: postgres
-      PGPOOL_ADMIN_PASSWORD: postgres
+      PGPOOL_ADMIN_USERNAME: admin
+      PGPOOL_ADMIN_PASSWORD: adminpassword
+      PGPOOL_ENABLE_LOAD_BALANCING: 'yes'
+      PGPOOL_POSTGRES_CUSTOM_USERS: postgres
+      PGPOOL_POSTGRES_CUSTOM_PASSWORDS: postgres
+      PGPOOL_USER_CONF_FILE: /config/extra.conf
     healthcheck:
       test: ["CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh"]
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - ./extra.conf:/config/extra.conf
 
   pg-master:
     image: 'pg-replication:latest'
