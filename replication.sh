@@ -7,11 +7,53 @@ psql -U postgres -c "SET password_encryption = 'scram-sha-256'; CREATE ROLE $REP
 
 # Add replication settings to primary postgres conf
 cat >> ${PGDATA}/postgresql.conf <<EOF
-listen_addresses= '*'
+hot_standby = on
 wal_level = replica
 max_wal_senders = 3
 max_replication_slots = 3
 synchronous_commit = ${SYNCHRONOUS_COMMIT}
+listen_addresses = '*'
+max_connections = 50			# (change requires restart)
+shared_buffers = 1009871kB			# min 128kB
+work_mem = 5049kB				# min 64kB
+#hash_mem_multiplier = 1.0		# 1-1000.0 multiplier on hash table work_mem
+maintenance_work_mem = 504935kB		# min 1MB
+dynamic_shared_memory_type = posix	# the default is the first option
+effective_io_concurrency = 256		# 1-1000; 0 disables prefetching
+#maintenance_io_concurrency = 10	# 1-1000; 0 disables prefetching
+max_worker_processes = 14		# (change requires restart)
+#max_parallel_maintenance_workers = 2	# taken from max_parallel_workers
+max_parallel_workers_per_gather = 2	# taken from max_parallel_workers
+#parallel_leader_participation = on
+max_parallel_workers = 3		# maximum number of max_worker_processes that
+wal_buffers = 16MB			# min 32kB, -1 sets based on shared_buffers
+#checkpoint_timeout = 5min		# range 30s-1d
+max_wal_size = 1GB
+min_wal_size = 512MB
+checkpoint_completion_target = 0.9	# checkpoint target duration, 0.0 - 1.0
+random_page_cost = 1.1			# same scale as above
+effective_cache_size = 2958MB
+default_statistics_target = 500	# range 1-10000
+log_timezone = 'Europe/Istanbul'
+autovacuum_max_workers = 10		# max number of autovacuum subprocesses
+# (change requires restart)
+autovacuum_naptime = 10		# time between autovacuum runs
+datestyle = 'iso, mdy'
+#intervalstyle = 'postgres'
+timezone = 'Europe/Istanbul'
+# These settings are initialized by initdb, but they can be changed.
+lc_messages = 'en_US.utf8'			# locale for system error message
+lc_monetary = 'en_US.utf8'			# locale for monetary formatting
+lc_numeric = 'en_US.utf8'			# locale for number formatting
+lc_time = 'en_US.utf8'				# locale for time formatting
+# default configuration for text search
+default_text_search_config = 'pg_catalog.english'
+shared_preload_libraries = 'timescaledb'	# (change requires restart)
+max_locks_per_transaction = 64		# min 10
+timescaledb.telemetry_level=basic
+timescaledb.max_background_workers = 8
+timescaledb.last_tuned = '2022-06-15T17:58:32+03:00'
+timescaledb.last_tuned_version = '0.12.0'
 EOF
 
 # Add synchronous standby names if we're in one of the synchronous commit modes
@@ -79,9 +121,47 @@ max_wal_senders = 3
 max_replication_slots = 3
 synchronous_commit = off
 listen_addresses = '*'
-max_worker_processes = 32
-max_locks_per_transaction = 256
-shared_preload_libraries = 'timescaledb'
+max_connections = 50			# (change requires restart)
+shared_buffers = 1009871kB			# min 128kB
+work_mem = 5049kB				# min 64kB
+#hash_mem_multiplier = 1.0		# 1-1000.0 multiplier on hash table work_mem
+maintenance_work_mem = 504935kB		# min 1MB
+dynamic_shared_memory_type = posix	# the default is the first option
+effective_io_concurrency = 256		# 1-1000; 0 disables prefetching
+#maintenance_io_concurrency = 10	# 1-1000; 0 disables prefetching
+max_worker_processes = 14		# (change requires restart)
+#max_parallel_maintenance_workers = 2	# taken from max_parallel_workers
+max_parallel_workers_per_gather = 2	# taken from max_parallel_workers
+#parallel_leader_participation = on
+max_parallel_workers = 3		# maximum number of max_worker_processes that
+wal_buffers = 16MB			# min 32kB, -1 sets based on shared_buffers
+#checkpoint_timeout = 5min		# range 30s-1d
+max_wal_size = 1GB
+min_wal_size = 512MB
+checkpoint_completion_target = 0.9	# checkpoint target duration, 0.0 - 1.0
+random_page_cost = 1.1			# same scale as above
+effective_cache_size = 2958MB
+default_statistics_target = 500	# range 1-10000
+log_timezone = 'Europe/Istanbul'
+autovacuum_max_workers = 10		# max number of autovacuum subprocesses
+# (change requires restart)
+autovacuum_naptime = 10		# time between autovacuum runs
+datestyle = 'iso, mdy'
+#intervalstyle = 'postgres'
+timezone = 'Europe/Istanbul'
+# These settings are initialized by initdb, but they can be changed.
+lc_messages = 'en_US.utf8'			# locale for system error message
+lc_monetary = 'en_US.utf8'			# locale for monetary formatting
+lc_numeric = 'en_US.utf8'			# locale for number formatting
+lc_time = 'en_US.utf8'				# locale for time formatting
+# default configuration for text search
+default_text_search_config = 'pg_catalog.english'
+shared_preload_libraries = 'timescaledb'	# (change requires restart)
+max_locks_per_transaction = 64		# min 10
+timescaledb.telemetry_level=basic
+timescaledb.max_background_workers = 8
+timescaledb.last_tuned = '2022-06-15T17:58:32+03:00'
+timescaledb.last_tuned_version = '0.12.0'
 EOF
 
 # hot_standby ensure that replica is only for readonly
@@ -133,9 +213,47 @@ max_wal_senders = 3
 max_replication_slots = 3
 synchronous_commit = off
 listen_addresses = '*'
-max_worker_processes = 32
-max_locks_per_transaction = 256
-shared_preload_libraries = 'timescaledb'
+max_connections = 50			# (change requires restart)
+shared_buffers = 1009871kB			# min 128kB
+work_mem = 5049kB				# min 64kB
+#hash_mem_multiplier = 1.0		# 1-1000.0 multiplier on hash table work_mem
+maintenance_work_mem = 504935kB		# min 1MB
+dynamic_shared_memory_type = posix	# the default is the first option
+effective_io_concurrency = 256		# 1-1000; 0 disables prefetching
+#maintenance_io_concurrency = 10	# 1-1000; 0 disables prefetching
+max_worker_processes = 14		# (change requires restart)
+#max_parallel_maintenance_workers = 2	# taken from max_parallel_workers
+max_parallel_workers_per_gather = 2	# taken from max_parallel_workers
+#parallel_leader_participation = on
+max_parallel_workers = 3		# maximum number of max_worker_processes that
+wal_buffers = 16MB			# min 32kB, -1 sets based on shared_buffers
+#checkpoint_timeout = 5min		# range 30s-1d
+max_wal_size = 1GB
+min_wal_size = 512MB
+checkpoint_completion_target = 0.9	# checkpoint target duration, 0.0 - 1.0
+random_page_cost = 1.1			# same scale as above
+effective_cache_size = 2958MB
+default_statistics_target = 500	# range 1-10000
+log_timezone = 'Europe/Istanbul'
+autovacuum_max_workers = 10		# max number of autovacuum subprocesses
+# (change requires restart)
+autovacuum_naptime = 10		# time between autovacuum runs
+datestyle = 'iso, mdy'
+#intervalstyle = 'postgres'
+timezone = 'Europe/Istanbul'
+# These settings are initialized by initdb, but they can be changed.
+lc_messages = 'en_US.utf8'			# locale for system error message
+lc_monetary = 'en_US.utf8'			# locale for monetary formatting
+lc_numeric = 'en_US.utf8'			# locale for number formatting
+lc_time = 'en_US.utf8'				# locale for time formatting
+# default configuration for text search
+default_text_search_config = 'pg_catalog.english'
+shared_preload_libraries = 'timescaledb'	# (change requires restart)
+max_locks_per_transaction = 64		# min 10
+timescaledb.telemetry_level=basic
+timescaledb.max_background_workers = 8
+timescaledb.last_tuned = '2022-06-15T17:58:32+03:00'
+timescaledb.last_tuned_version = '0.12.0'
 EOF
 
 # hot_standby ensure that replica is only for readonly
