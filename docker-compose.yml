@@ -1,8 +1,42 @@
 version: '3.9'
 
 services:
+  pgpool2:
+    image: 'pgpool/pgpool:4.0.23'
+    ports:
+      - 7000:7000
+    environment:
+      PGPOOL_PARAMS_PORT: 7000
+      PGPOOL_PARAMS_BACKEND_HOSTNAME0: pg-master
+      PGPOOL_PARAMS_BACKEND_PORT0: 5432
+      PGPOOL_PARAMS_BACKEND_WEIGHT0: 0
+      PGPOOL_PARAMS_BACKEND_DATA_DIRECTORY0: tmp/master/
+      PGPOOL_PARAMS_BACKEND_HOSTNAME1: pg-slave1
+      PGPOOL_PARAMS_BACKEND_PORT1: 5433
+      PGPOOL_PARAMS_BACKEND_WEIGHT1: 1
+      PGPOOL_PARAMS_BACKEND_DATA_DIRECTORY1: tmp/slave1/
+      PGPOOL_PARAMS_BACKEND_HOSTNAME2: pg-slave2
+      PGPOOL_PARAMS_BACKEND_PORT2: 5434
+      PGPOOL_PARAMS_BACKEND_WEIGHT2: 2
+      PGPOOL_PARAMS_BACKEND_DATA_DIRECTORY2: tmp/slave2/
+      PGPOOL_PARAMS_SR_CHECK_USER: repuser
+      PGPOOL_PARAMS_SR_CHECK_PASSWORD: repuser
+      PGPOOL_PARAMS_HEALTH_CHECK_PERIOD: 10
+      PGPOOL_PARAMS_HEALTH_CHECK_USER: repuser
+      PGPOOL_PARAMS_HEALTH_CHECK_PASSWORD: repuser
+      PGPOOL_PARAMS_ENABLE_POOL_HBA: 'on'
+      PGPOOL_PARAMS_ENABLE_POOL_PASSWD: /opt/pgpool-II/etc/pool_passwd
+      PGPOOL_PCP_USER: myadminuser
+      PGPOOL_PCP_PASSWORD: mypassword
+    volumes:
+      - ./pgpool.conf:/opt/pgpool-II/etc/pgpool.conf
+      - ./pool_hba.conf:/opt/pgpool-II/etc/pool_hba.conf
+      - ./pool_passwd:/opt/pgpool-II/etc/pool_passwd
+
   pg-master:
-    image: 'pg-replication:latest'
+    build:
+      context: ./
+      dockerfile: Dockerfile
     ports:
       - 5432:5432
     environment:
@@ -19,7 +53,9 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
 
   pg-slave1:
-    image: 'pg-replication:latest'
+    build:
+      context: ./
+      dockerfile: Dockerfile
     ports:
       - 5433:5432
     environment:
@@ -31,7 +67,9 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
 
   pg-slave2:
-    image: 'pg-replication:latest'
+    build:
+      context: ./
+      dockerfile: Dockerfile
     ports:
       - 5434:5432
     environment:
