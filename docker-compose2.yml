@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  pgpool:
+    image: bitnami/pgpool:4
+    ports:
+      - 7000:5432
+    environment:
+      PGPOOL_BACKEND_NODES: 0:localhost:5432,1:localhost:5433,2:localhost:5434
+      PGPOOL_SR_CHECK_USER: repuser
+      PGPOOL_SR_CHECK_PASSWORD: repuser
+      PGPOOL_SR_CHECK_DATABASE: postgres
+      PGPOOL_ENABLE_LDAP: 'no'
+      PGPOOL_POSTGRES_USERNAME: postgres
+      PGPOOL_POSTGRES_PASSWORD: postgres
+      PGPOOL_ADMIN_USERNAME: admin
+      PGPOOL_ADMIN_PASSWORD: adminpassword
+      POSTGRESQL_USERNAME: repuser
+      POSTGRESQL_PASSWORD: repuser
+      POSTGRESQL_DATABASE: postgres
+      PGPOOL_FAILOVER_ON_BACKEND_ERROR: 'on'
+    volumes:
+      - ./pgpool.conf:/opt/bitnami/pgpool/sefa/pgpool.conf
+    healthcheck:
+      test: [ "CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
